@@ -1,6 +1,13 @@
 from django.http import JsonResponse
-from django.utils import dateparse
-from .models import *
+from django.views.generic import TemplateView
+import pandas as pd
+import io
+from .models import Journey
+from django.shortcuts import render
+from .fare_calculator import FareCalculator
+from django.db import transaction
+from django.utils.decorators import method_decorator
+from django.views.decorators.csrf import csrf_exempt
 
 
 # Create your views here.
@@ -12,43 +19,50 @@ def calculate_fare(request):
         time = request.GET.get("time")
         if not source or not destination or not time:
             return JsonResponse({"error": "Invalid Parameters"}, status=400)
-        source = Line.objects.get(name=source.title())
-        destination = Line.objects.get(name=destination.title())
-        date = dateparse.parse_datetime(time)
-        time = date.time()
 
-        # If conflicting route information is available, use the latest one
-        route = Route.objects.filter(source=source, destination=destination).last()
-        if not route:
-            return JsonResponse({"error": "No Route Found"}, status=404)
-
-        # Check for peak hours and calculate fare
-        traffic = Traffic.objects.filter(from_time__lte=time, to_time__gte=time)
-        if traffic.exists():
-            fare = route.peak_hours_price if traffic.last().peak_hours else route.off_peak_hours_price
-        else:
-            fare = route.off_peak_hours_price
-
-        # Apply daily cap
-        fare = min(route.daily_cap, fare)
-
-        # Apply weekly cap
-        history = Journey.objects.filter(source=source, destination=destination, date__week=date.isocalendar()[1])
-        if history.exists():
-            total_fares = fare + sum([journey.fare for journey in history])
-        else:
-            total_fares = fare
-
-        if total_fares >= route.weekly_cap:
-            discount = total_fares - route.weekly_cap
-            fare -= discount
-            fare = max(fare, 0)
-
-        # Save the journey information for calculating weekly discounts in future
-        Journey.objects.create(source=source, destination=destination, date=date, fare=fare)
-
-        return JsonResponse({"fare": fare})
+        # Atomic Transaction reverts in case of errors
+        with transaction.atomic():
+            fare = FareCalculator(source, destination, time).calculate_fare()
+            # Save the journey information for calculating weekly discounts in future
+            Journey.objects.create(source=source, destination=destination, date=date, fare=fare)
+            return JsonResponse({"fare": fare})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)
 
+
+class CsvUploader(TemplateView):
+    template_name = 'csv_uploader.html'
+
+    @method_decorator(csrf_exempt)
+    def post(self, request):
+        context = {
+            'messages': [],
+            'data': []
+        }
+
+        csv = request.FILES['csv']
+        csv_data = pd.read_csv(
+            io.StringIO(
+                csv.read().decode("utf-8")
+            )
+        )
+
+        for record in csv_data.to_dict(orient="records"):
+            try:
+                with transaction.atomic():
+                    calculator = FareCalculator(record['from'], record['to'], record['date'])
+                    fare = calculator.calculate_fare()
+                    trip = Journey.objects.create(source=calculator.source,
+                                           destination=calculator.destination,
+                                           date=calculator.date,
+                                           fare=fare)
+                    context['messages'].append(
+                        f"Journey from {record['from']} to {record['to']} on {record['date']} costs ${fare}"
+                    )
+                    context['data'].append(trip)
+
+            except Exception as e:
+                context['exceptions_raised'] = e
+
+        return render(request, self.template_name, context)
 

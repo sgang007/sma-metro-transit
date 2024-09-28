@@ -1,0 +1,45 @@
+{% load static %}
+<link rel="stylesheet" href="{% static 'styles.css' %}">
+{% if messages and data %}
+    <div class="custom-file mb-4">
+        <div class="header">
+            <h1>Fare Calculation Results</h1>
+        </div>
+    </div>
+    <table>
+        <tr>
+            <th>From</th>
+            <th>To</th>
+            <th>Date</th>
+            <th>Fare</th>
+        </tr>
+        {% for row in data %}
+            <tr>
+                <td>{{ row.source }}</td>
+                <td>{{ row.destination }}</td>
+                <td>{{ row.date }}</td>
+                <td>$ {{ row.fare }}</td>
+            </tr>
+        {% endfor %}
+    </table>
+{% endif %}
+{% if not messages %}
+    <div class="custom-file mb-4">
+        <div class="header">
+            <h1>Singa Metro Trips CSV Uploader</h1>
+        </div>
+
+        <form id="example-form1" action="." method="post" enctype="multipart/form-data">{% csrf_token %}
+            <label for="images" class="drop-container">
+                <span class="drop-title">Drop files here</span>
+                or
+                <input type="file" class="custom-file-input" id="customFile" name="csv" required accept=".csv" size="60">
+            </label>
+        <div>
+            <div align="center">
+                <input type="submit" class="button" value="Submit">
+            </div>
+        </div>
+        </form>
+    </div>
+{% endif %}
