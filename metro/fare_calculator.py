@@ -8,6 +8,31 @@ class FareCalculator:
         self.destination = Line.objects.get(name=destination.title())
         self.date = dateparse.parse_datetime(date)
 
+    def apply_daily_cap(self, fare, route):
+        history = Journey.objects.filter(source=self.source,
+                                         destination=self.destination,
+                                         date__year=self.date.year,
+                                         date__month=self.date.month,
+                                         date__day=self.date.day)
+        old_fares = sum([journey.fare for journey in history])
+        if old_fares + fare >= route.daily_cap:
+            discount = old_fares + fare - route.daily_cap
+            fare -= discount
+            fare = max(fare, 0)
+        return fare
+
+    def apply_weekly_cap(self, fare, route):
+        history = Journey.objects.filter(source=self.source,
+                                         destination=self.destination,
+                                         date__year=self.date.year,
+                                         date__week=self.date.isocalendar()[1])
+        old_fares = sum([journey.fare for journey in history])
+        if old_fares + fare >= route.weekly_cap:
+            discount = old_fares + fare - route.weekly_cap
+            fare -= discount
+            fare = max(fare, 0)
+        return fare
+
     def calculate_fare(self):
         # Logic to calculate fare
         # If conflicting route information is available, use the latest one
@@ -21,21 +46,11 @@ class FareCalculator:
         fare = route.peak_hours_price if peak_traffic.exists() else route.off_peak_hours_price
 
         # Apply daily cap
-        fare = min(route.daily_cap, fare)
+        fare = self.apply_daily_cap(fare, route)
 
         # Apply weekly cap
-        history = Journey.objects.filter(source=self.source,
-                                         destination=self.destination,
-                                         date__week=self.date.isocalendar()[1])
-        if history.exists():
-            total_fares = fare + sum([journey.fare for journey in history])
-        else:
-            total_fares = fare
-
-        if total_fares >= route.weekly_cap:
-            discount = total_fares - route.weekly_cap
-            fare -= discount
-            fare = max(fare, 0)
+        fare = self.apply_weekly_cap(fare, route)
 
         return fare
+
 
