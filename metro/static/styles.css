@@ -65,10 +65,12 @@
   }
 
 table {
-    width: 100%;
-    margin: 20px;
-    padding: 25px;
-  }
+  width: 100%;
+  margin: 20px;
+  padding: 25px;
+  font-family: "Courier New";
+  font-size: 20px;
+}
 
 th, td {
   padding: 15px;
@@ -80,4 +82,22 @@ tr:nth-child(even) {background-color: #f2f2f2;}
 th {
   background-color: #04AA6D;
   color: white;
+}
+
+.error-header {
+  background: red;
+  color: white;
+}
+
+.error-block {
+  padding: 20px 0;
+  text-align: center;
+}
+
+.alert-danger {
+  border: 2px solid red;
+  color: red;
+  background: lightgray;
+  padding: 15px;
+  margin: 0 25px;
 }

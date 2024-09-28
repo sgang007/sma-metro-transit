@@ -1,5 +1,17 @@
 {% load static %}
 <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+{% if exceptions_raised %}
+    <div class="error-block mb-4">
+        <div class="error-header">
+            <h1>Data Error</h1>
+        </div>
+        <div class="alert alert-danger" role="alert">
+            {{ exceptions_raised }}
+        </div>
+    </div>
+{% endif %}
+
 {% if messages and data %}
     <div class="custom-file mb-4">
         <div class="header">
@@ -23,6 +35,7 @@
         {% endfor %}
     </table>
 {% endif %}
+
 {% if not messages %}
     <div class="custom-file mb-4">
         <div class="header">

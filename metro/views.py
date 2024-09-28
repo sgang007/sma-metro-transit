@@ -16,15 +16,19 @@ def calculate_fare(request):
         # Query the DB for available route information
         source = request.GET.get("from")
         destination = request.GET.get("to")
-        time = request.GET.get("time")
-        if not source or not destination or not time:
+        date = request.GET.get("date")
+        if not source or not destination or not date:
             return JsonResponse({"error": "Invalid Parameters"}, status=400)
 
         # Atomic Transaction reverts in case of errors
         with transaction.atomic():
-            fare = FareCalculator(source, destination, time).calculate_fare()
+            calculator = FareCalculator(source, destination, date)
+            fare = calculator.calculate_fare()
             # Save the journey information for calculating weekly discounts in future
-            Journey.objects.create(source=source, destination=destination, date=date, fare=fare)
+            Journey.objects.create(source=calculator.source,
+                                   destination=calculator.destination,
+                                   date=calculator.date,
+                                   fare=fare)
             return JsonResponse({"fare": fare})
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=400)

@@ -33,11 +33,22 @@ Install Docker daemon: [Docker Installation](https://docs.docker.com/get-docker/
     - URL Query Params:
         - `from`: Line where the user enters the metro
         - `to`: Line where the user exits the metro
-        - `time`: Time of the journey
-    - Example: [http://localhost:8000/metro/calculate-fare/?from=red&to=green&time=2021-03-24T09:58:30](http://localhost:8000/metro/calculate-fare/?from=red&to=green&time=2021-03-24T09:58:30)
+        - `date`: Date and Time of the journey in ISO format
+    - Example: [http://localhost:8000/metro/calculate-fare/?from=red&to=green&date=2021-03-24T09:58:30](http://localhost:8000/metro/calculate-fare/?from=red&to=green&date=2021-03-24T09:58:30)
     - Response:
     ```json
     {
         "fare": 5.0
     }
     ```
+   
+## CSV Bulk Upload Application
+1. Open the browser and navigate to [http://localhost:8000/metro](http://localhost:8000/metro/)
+2. Upload the CSV file with the following format:
+    - `from, to, date`
+    - Example:
+    ```
+    red,green,2021-03-24T09:58:30
+    green,blue,2021-05-2T19:58:30
+    ```
+3. Click on the `Upload` button to calculate the fare for each journey.
