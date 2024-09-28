@@ -12,9 +12,10 @@ def calculate_fare(request):
         time = request.GET.get("time")
         if not source or not destination or not time:
             return JsonResponse({"error": "Invalid Parameters"}, status=400)
-        source = Line.objects.get(name=source)
-        destination = Line.objects.get(name=destination)
-        time = dateparse.parse_datetime(time).time()
+        source = Line.objects.get(name=source.title())
+        destination = Line.objects.get(name=destination.title())
+        date = dateparse.parse_datetime(time)
+        time = date.time()
 
         # If conflicting route information is available, use the latest one
         route = Route.objects.filter(source=source, destination=destination).last()
@@ -32,7 +33,7 @@ def calculate_fare(request):
         fare = min(route.daily_cap, fare)
 
         # Apply weekly cap
-        history = Journey.objects.filter(source=source, destination=destination)
+        history = Journey.objects.filter(source=source, destination=destination, date__week=date.isocalendar()[1])
         if history.exists():
             total_fares = fare + sum([journey.fare for journey in history])
         else:
@@ -44,7 +45,7 @@ def calculate_fare(request):
             fare = max(fare, 0)
 
         # Save the journey information for calculating weekly discounts in future
-        Journey.objects.create(source=source, destination=destination, time=time, fare=fare)
+        Journey.objects.create(source=source, destination=destination, date=date, fare=fare)
 
         return JsonResponse({"fare": fare})
     except Exception as e:

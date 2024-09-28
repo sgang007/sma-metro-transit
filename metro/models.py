@@ -58,9 +58,9 @@ class Journey(models.Model):
     card_id = models.CharField(max_length=100, blank=True, null=True)
     source = models.ForeignKey(Line, on_delete=models.CASCADE, related_name='journey_source')
     destination = models.ForeignKey(Line, on_delete=models.CASCADE, related_name='journey_destination')
-    time = models.TimeField()
+    date = models.DateTimeField()
     fare = models.FloatField()
 
     def __str__(self):
-        return f'{self.source} to {self.destination} on {self.time} at {self.fare}'
+        return f'${self.fare} : {self.source} to {self.destination}  |  {self.date.strftime("%d/%m/%Y, %H:%M")}'
 
