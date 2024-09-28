@@ -6,5 +6,5 @@ COPY ./requirements.txt ./
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 COPY . /app
-RUN python manage.py makemigrations && python manage.py migrate
-CMD [ "sh","-c", "python3 manage.py collectstatic --noinput && gunicorn --bind 0.0.0.0:8000 sma_metro_transit.wsgi"]
+RUN python manage.py makemigrations && python manage.py migrate && python manage.py collectstatic --noinput
+CMD [ "sh","-c", "gunicorn --bind 0.0.0.0:8000 sma_metro_transit.wsgi"]

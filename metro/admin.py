@@ -8,3 +8,10 @@ admin.site.register(Station)
 admin.site.register(Route)
 admin.site.register(Traffic)
 admin.site.register(Journey)
+
+# Hiding Unnecessary Models for this task
+from django.contrib.auth.models import User
+from django.contrib.auth.models import Group
+
+admin.site.unregister(User)
+admin.site.unregister(Group)

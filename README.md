@@ -14,13 +14,16 @@ User Management, card management, and other features are not covered in this cod
 1. Only Line to Line travel is allowed. Stations are not used.
 2. All trips belong to the same NFC Card.
 
+## Pre-requisites
+Install Docker daemon: [Docker Installation](https://docs.docker.com/get-docker/)
+
 ## Starting the Application
 1. Clone the repository
-2. Build the docker image: `docker build -it singa-metro .`
-3. Run the application: `docker run -it -p 8000:8000 -e DJANGO_SUPERUSER_USERNAME=admin -e DJANGO_SUPERUSER_PASSWORD=admin123 -e DJANGO_SUPERUSER_EMAIL=admin@example.com singa-metro `
+2. Build the docker image: `docker build -t singa-metro .`
+3. Run the application: `docker run -it -p 8000:8000 -e DJANGO_SUPERUSER_USERNAME=admin -e DJANGO_SUPERUSER_PASSWORD=123 -e DJANGO_SUPERUSER_EMAIL=admin@example.com singa-metro `
 
 ## Configuration
-1. Login to Admin Panel with user `admin` and  password `admin123`: [Admin Panel](http://localhost:8000/admin/metro/)
+1. Login to Admin Panel with user `admin` and  password `123`: [Admin Panel](http://localhost:8000/admin/metro/)
 2. Configure Lines: [Add / Remove New Lines](http://localhost:8000/admin/metro/line/)
 3. Configure peak hours: [Change Traffic Hours](http://localhost:8000/admin/metro/line/)
 4. Configure fare rules: [Change fare rules](http://localhost:8000/admin/metro/fare/)
