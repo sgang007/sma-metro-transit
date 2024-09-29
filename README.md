@@ -10,6 +10,8 @@ and more stations coming in the future.
 *Note: This code covers how to apply fare rules and calculate prices.
 User Management, card management, and other features are not covered in this code.*
 
+![screenhost](https://raw.githubusercontent.com/sgang007/sma-metro-transit/refs/heads/main/Screenshot.png?raw=true)
+
 ## Assumptions
 1. Only Line to Line travel is allowed. Stations are not used.
 2. All trips belong to the same NFC Card.
