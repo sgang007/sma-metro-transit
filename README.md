@@ -54,3 +54,9 @@ Install Docker daemon: [Docker Installation](https://docs.docker.com/get-docker/
     green,blue,2021-05-2T19:58:30
     ```
 3. Click on the `Upload` button to calculate the fare for each journey.
+
+## Journey History
+The record for each journey and fare calculated is stored in the Journey table and is used for calculating daily and weekly caps.
+If fare calculated is showing 0, it means there is already enough journey data for that day which is hitting either the daily or weekly cap.
+Clear the journey data by deletin all records from this link:
+[http://localhost:8000/admin/metro/journey](http://localhost:8000/admin/metro/journey)
