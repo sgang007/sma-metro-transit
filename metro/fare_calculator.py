@@ -1,5 +1,7 @@
 from .models import *
 from django.utils import dateparse
+from datetime import timedelta
+from django.utils.timezone import is_aware, make_aware
 
 
 class FareCalculator:
@@ -7,6 +9,8 @@ class FareCalculator:
         self.source = Line.objects.get(name=source.title())
         self.destination = Line.objects.get(name=destination.title())
         self.date = dateparse.parse_datetime(date)
+        if not is_aware(self.date):
+            self.date = make_aware(self.date)
 
     def apply_daily_cap(self, fare, route):
         history = Journey.objects.filter(source=self.source,
@@ -25,7 +29,7 @@ class FareCalculator:
         history = Journey.objects.filter(source=self.source,
                                          destination=self.destination,
                                          date__year=self.date.year,
-                                         date__week=self.date.isocalendar()[1])
+                                         date__gte=self.date - timedelta(days=7))
         old_fares = sum([journey.fare for journey in history])
         if old_fares + fare >= route.weekly_cap:
             discount = old_fares + fare - route.weekly_cap
@@ -42,7 +46,11 @@ class FareCalculator:
 
         # Check for peak hours and calculate fare
         time = self.date.time()
-        peak_traffic = Traffic.objects.filter(from_time__lte=time, to_time__gte=time, peak_hours=True)
+        weekday = Traffic.Day(str(self.date.weekday() + 1))
+        peak_traffic = Traffic.objects.filter(day=weekday,
+                                              from_time__lte=time,
+                                              to_time__gte=time,
+                                              peak_hours=True)
         fare = route.peak_hours_price if peak_traffic.exists() else route.off_peak_hours_price
 
         # Apply daily cap

@@ -44,7 +44,7 @@ Install Docker daemon: [Docker Installation](https://docs.docker.com/get-docker/
    
 ## CSV Bulk Upload Application
 1. Open the browser and navigate to [http://localhost:8000/metro](http://localhost:8000/metro/)
-2. Upload the CSV file with the following format:
+2. Upload the CSV file with the following format. See `test.csv` for example:
     - `from, to, date`
     - Example:
     ```
